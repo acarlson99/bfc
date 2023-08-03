@@ -38,6 +38,11 @@ func main() {
 	var arch string
 	var outputFile string
 
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  Compiler for Brainfuck targetting LLVM.\n")
+		flag.PrintDefaults()
+	}
 	flag.StringVar(&arch, "arch", "x86_64-pc-linux-gnu", "Target architecture")
 	flag.StringVar(&outputFile, "o", "", "Output file path")
 	flag.Parse()
