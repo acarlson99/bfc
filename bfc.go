@@ -3,6 +3,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -34,10 +35,17 @@ const (
 )
 
 func main() {
-	var scanner *bufio.Scanner
+	var arch string
+	var outputFile string
 
-	if len(os.Args) > 1 {
-		filePath := os.Args[1]
+	flag.StringVar(&arch, "arch", "x86_64-pc-linux-gnu", "Target architecture")
+	flag.StringVar(&outputFile, "o", "", "Output file path")
+	flag.Parse()
+	args := flag.Args()
+
+	var scanner *bufio.Scanner
+	if len(args) > 0 {
+		filePath := args[0]
 		file, err := os.Open(filePath)
 		if err != nil {
 			fmt.Println("Error opening file:", err)
@@ -49,7 +57,20 @@ func main() {
 		scanner = bufio.NewScanner(os.Stdin)
 	}
 
-	fmt.Println(compile(scanner))
+	m := compile(scanner)
+	m.TargetTriple = arch
+
+	if outputFile != "" {
+		output, err := os.Create(outputFile)
+		if err != nil {
+			fmt.Println("Error creating output file:", err)
+			return
+		}
+		defer output.Close()
+		fmt.Fprintln(output, m)
+	} else {
+		fmt.Println(m)
+	}
 }
 
 func compile(scanner *bufio.Scanner) *ir.Module {
